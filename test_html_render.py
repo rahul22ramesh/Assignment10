@@ -189,14 +189,15 @@ def test_oneline():
     """"
     Simple test case without other elements
     """
-    page = Html()
-    page.append(Title("Simple one line tag"))
+    e = Title("This is a Title")
 
-    file_contents = render_result(page)
+    file_contents = render_result(e).strip()
+
+    assert ("This is a Title") in file_contents
     print(file_contents)
-    #assert False
-    lines = file_contents.splitlines()
-    assert len(lines) == 3
+    assert file_contents.startswith("<title>")
+    assert file_contents.endswith("</title>")
+    assert "\n" not in file_contents
 
 
 def test_oneline_sub():
@@ -208,9 +209,53 @@ def test_oneline_sub():
     page.append(P("A simple paragraph of text"))
     file_contents = render_result(page)
     print(file_contents)
-    assert False
+    #assert False
     lines = file_contents.splitlines()
     assert lines[2] == "<p>"
+
+def test_one_line_tag_append():
+    """
+    You should not be able to append content to a OneLineTag
+    """
+    e = OneLineTag("the initial content")
+    with pytest.raises(NotImplementedError):
+        e.append("some more content")
+
+def test_init_kwargs():
+    """
+    """
+    attr = {"style":"cool", "class":"intro"}
+    result = Element("something", **attr)
+    assert result.attributes["style"] == "cool"
+    #assert hasattr(result, "class")
+
+def test_kwarg_render():
+    e = P("A paragraph of text", style="text-align: center", id="intro")
+
+    file_contents = render_result(e).strip()
+    print(file_contents)  # so we can see it if the test fails
+
+    # note: The previous tests should make sure that the tags are getting
+    #       properly rendered, so we don't need to test that here.
+    #       so using only a "P" tag is fine
+    assert "A paragraph of text" in file_contents
+    # but make sure the embedded element's tags get rendered!
+    # first test the end tag is there -- same as always:
+    assert file_contents.endswith("</p>")
+
+    # but now the opening tag is far more complex
+    # but it starts the same:
+    assert file_contents.startswith("<p")
+    assert 'style="text-align: center"' in file_contents
+    assert 'id="intro"' in file_contents
+
+def test_attr_render():
+    e = P("A paragraph of text", style="text-align: center", id="intro")
+    results = render_result(e).strip()
+    assert results.startswith("<p style")
+    print(results)
+    #assert False
+    assert "text-align" in results
 
 # #####################
 # # indentation testing
