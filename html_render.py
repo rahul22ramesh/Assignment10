@@ -13,10 +13,11 @@ class Element:
     def __init__(self, content=None, **kwargs):
         if content is not None:
             self._content = [content]
-            if kwargs:
-                self.attributes = kwargs
         else:
             self._content = []
+        if kwargs:
+            self.attributes = kwargs
+
 
     def append(self, new_content):
         self._content.append(new_content)
@@ -44,7 +45,9 @@ class Element:
 
 
 class Html (Element):
-    pass
+    def render(self, out_file):
+        out_file.write("<!DOCTYPE html>\n")
+        super().render(out_file)
 
 
 class Body (Element):
@@ -61,7 +64,7 @@ class Head (Element):
 
 class OneLineTag(Element):
     def render(self, out_file):
-        out_file.write(f"{self._open_tag()} {self._content[0]} {self._close_tag()}")
+        out_file.write(f"{self._open_tag()}{self._content[0]}{self._close_tag()}")
 
     def append(self, content):
         raise NotImplementedError
@@ -70,7 +73,40 @@ class OneLineTag(Element):
 class Title(OneLineTag):
     tag = "title"
 
-'''
+
 class SelfClosingTag (Element):
     def render(self, out_file):
-'''
+        temp_tag = self._open_tag()
+        temp_tag = temp_tag[:-1]
+        temp_tag += " />\n"
+        out_file.write(temp_tag)
+
+
+class Hr(SelfClosingTag):
+    tag = "hr"
+
+
+class Br(SelfClosingTag):
+    tag = "br"
+
+
+class A (OneLineTag):
+    tag = "a"
+
+    def __init__(self, link, content=None, **kwargs):
+        kwargs['href'] = link
+        super().__init__(content, **kwargs)
+
+
+class UL(Element):
+    tag = "ul"
+
+
+class Li(Element):
+    tag = "li"
+
+
+class Header (OneLineTag):
+    def __init__(self, font, content=None, **kwargs):
+        self.tag = "h"+ str(font)
+        super().__init__(content, **kwargs)

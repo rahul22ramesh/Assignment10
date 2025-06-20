@@ -211,7 +211,7 @@ def test_oneline_sub():
     print(file_contents)
     #assert False
     lines = file_contents.splitlines()
-    assert lines[2] == "<p>"
+    assert lines[3] == "<p>"
 
 def test_one_line_tag_append():
     """
@@ -257,10 +257,64 @@ def test_attr_render():
     #assert False
     assert "text-align" in results
 
+def test_selfclose():
+    e = Hr(width=400)
+    result = render_result(e).strip()
+    print(result)
+    assert result == '<hr width="400" />'
+
+def test_br():
+    br = Br()
+    file_contents = render_result(br)
+    print(file_contents)
+    assert file_contents == "<br />\n"
+
+def test_a():
+    a = A("www.google.com", "link to google")
+    result = render_result(a)
+    print(result)
+    assert result.startswith('<a ')
+    assert result == '<a href="www.google.com">link to google</a>'
+
 # #####################
 # # indentation testing
 # #  Uncomment for Step 9 -- adding indentation
 # #####################
+
+def test_ul():
+    ulist = UL(style="line-height:200%", id="TheList")
+    result = render_result(ulist).strip()
+    print(result)
+    assert result.endswith("</ul>")
+
+def test_li():
+    li_list = Li(style="color: red")
+    result = render_result(li_list).strip()
+    print(result)
+    assert result.endswith("</li>")
+
+def test_lists():
+    obj1 = UL(style="line-height:200%", id="TheList")
+    obj1.append(Li("This is the second item", style="color: red"))
+    results = render_result(obj1).strip()
+    print(results)
+    #assert False
+    results = results.splitlines()
+    assert results[2] == "This is the second item"
+    assert results[3] == "</li>"
+
+def test_h1():
+    obj = Header(1, "The text of the Header")
+    result = render_result(obj).strip()
+    print(result)
+    assert result.startswith("<h1>")
+
+def test_doc_string():
+    obj = Html()
+    result = render_result(obj).strip()
+    print(result)
+    assert result.startswith("<!DOCTYPE html>")
+    assert result.endswith("</html>")
 
 
 # def test_indent():
